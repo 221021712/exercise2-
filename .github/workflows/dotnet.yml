@@ -1,20 +1,27 @@
-name: .NET CI
+name: Deploy to GitHub Pages
 
-on: [push, pull_request]
+on:
+  push:
+    branches: [ master ]
 
 jobs:
-  build:
-    runs-on: windows-latest
+  deploy:
+    runs-on: ubuntu-latest
     
     steps:
     - uses: actions/checkout@v4
+    
     - name: Setup .NET
       uses: actions/setup-dotnet@v3
       with:
         dotnet-version: '8.0.x'
-    - name: Restore dependencies
-      run: dotnet restore
-    - name: Build
-      run: dotnet build --no-restore
-    - name: Test
-      run: dotnet test --no-build --verbosity normal
+        
+    - name: Publish
+      run: dotnet publish -c Release -o published --nologo
+      
+    - name: Deploy to GitHub Pages
+      uses: peaceiris/actions-gh-pages@v3
+      with:
+        github_token: ${{ secrets.GITHUB_TOKEN }}
+        publish_dir: ./published/wwwroot  # For ASP.NET Core
+        # OR publish_dir: ./published  # For console apps with output
