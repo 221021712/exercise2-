@@ -1,0 +1,405 @@
+﻿@model LifestyleSurvey.Models.SurveyResponse
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Lifestyle Preferences Survey</title>
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+    <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/css/bootstrap.min.css" rel="stylesheet">
+    <style>
+        body {
+            background-color: #f8f9fa;
+            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+            color: #343a40;
+        }
+
+        .header {
+            background: linear-gradient(135deg, #6a11cb 0%, #2575fc 100%);
+            color: white;
+            padding: 2.5rem 1rem;
+            margin-bottom: 2rem;
+            border-radius: 0 0 10px 10px;
+        }
+
+        .survey-container {
+            max-width: 900px;
+            margin: 0 auto;
+            background: white;
+            padding: 2rem;
+            border-radius: 10px;
+            box-shadow: 0 0.5rem 1rem rgba(0, 0, 0, 0.1);
+            margin-bottom: 2rem;
+        }
+
+        .form-section {
+            background: #f8f9fa;
+            padding: 1.5rem;
+            border-radius: 8px;
+            margin-bottom: 2rem;
+            border-left: 4px solid #6a11cb;
+        }
+
+            .form-section h4 {
+                color: #6a11cb;
+                margin-bottom: 1rem;
+            }
+
+        .food-preferences {
+            display: flex;
+            flex-wrap: wrap;
+            gap: 1rem;
+            justify-content: center;
+            margin-top: 1rem;
+        }
+
+        .food-option {
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            padding: 1rem;
+            border: 2px solid #dee2e6;
+            border-radius: 8px;
+            cursor: pointer;
+            transition: all 0.3s ease;
+            width: 140px;
+            position: relative;
+        }
+
+            .food-option:hover {
+                border-color: #6a11cb;
+                transform: translateY(-5px);
+            }
+
+            .food-option.selected {
+                border-color: #28a745;
+                background-color: rgba(40, 167, 69, 0.1);
+            }
+
+        .food-icon {
+            font-size: 2rem;
+            margin-bottom: 0.5rem;
+            color: #6a11cb;
+        }
+
+        .food-option.selected .food-icon {
+            color: #28a745;
+        }
+
+        .checkmark {
+            position: absolute;
+            top: 5px;
+            right: 5px;
+            color: #28a745;
+            font-size: 1.2rem;
+            opacity: 0;
+            transition: opacity 0.3s ease;
+        }
+
+        .food-option.selected .checkmark {
+            opacity: 1;
+        }
+
+        .rating-table {
+            width: 100%;
+            border-collapse: collapse;
+            margin-top: 1rem;
+        }
+
+            .rating-table th, .rating-table td {
+                padding: 0.75rem;
+                text-align: center;
+                border: 1px solid #dee2e6;
+            }
+
+            .rating-table th {
+                background-color: #e9ecef;
+                font-weight: 600;
+            }
+
+            .rating-table tr:nth-child(even) {
+                background-color: #f8f9fa;
+            }
+
+        .rating-option {
+            display: flex;
+            justify-content: center;
+            align-items: center;
+        }
+
+            .rating-option input[type="radio"] {
+                transform: scale(1.2);
+                cursor: pointer;
+            }
+
+        .rating-table td:first-child {
+            text-align: left;
+            font-weight: 500;
+        }
+
+        .btn-primary {
+            background: linear-gradient(135deg, #6a11cb 0%, #2575fc 100%);
+            border: none;
+            padding: 0.75rem 2rem;
+            font-size: 1.1rem;
+            transition: all 0.3s ease;
+        }
+
+            .btn-primary:hover {
+                transform: translateY(-3px);
+                box-shadow: 0 5px 15px rgba(0, 0, 0, 0.2);
+            }
+
+        .btn-results {
+            background: linear-gradient(135deg, #28a745 0%, #20c997 100%);
+            border: none;
+            padding: 0.75rem 2rem;
+            font-size: 1.1rem;
+            transition: all 0.3s ease;
+            margin-left: 1rem;
+        }
+
+            .btn-results:hover {
+                transform: translateY(-3px);
+                box-shadow: 0 5px 15px rgba(0, 0, 0, 0.2);
+            }
+
+        @@media (max-width: 768px) {
+            .rating-table {
+                display: block;
+                overflow-x: auto;
+            }
+
+            .food-option {
+                width: 120px;
+            }
+
+            .btn-results {
+                margin-left: 0;
+                margin-top: 1rem;
+            }
+        }
+
+        .field-validation-error {
+            color: #dc3545;
+            font-size: 0.875rem;
+            margin-top: 0.25rem;
+        }
+    </style>
+</head>
+<body>
+    <div class="header text-center">
+        <h1><i class="fas fa-clipboard-list me-2"></i>Lifestyle Preferences Survey</h1>
+        <p class="lead">Share your preferences and help us understand lifestyle choices</p>
+    </div>
+
+    <div class="container">
+        <div class="survey-container">
+            <form id="surveyForm" method="post" asp-action="Create">
+                @Html.AntiForgeryToken()
+
+                <div class="form-section">
+                    <h4><i class="fas fa-user me-2"></i>Personal Details</h4>
+                    <div class="row mt-4">
+                        <div class="col-md-6 mb-3">
+                            <label asp-for="FullNames" class="form-label">Full Names</label>
+                            <input asp-for="FullNames" class="form-control" required>
+                            <span asp-validation-for="FullNames" class="field-validation-error"></span>
+                        </div>
+                        <div class="col-md-6 mb-3">
+                            <label asp-for="Email" class="form-label">Email</label>
+                            <input asp-for="Email" class="form-control" required>
+                            <span asp-validation-for="Email" class="field-validation-error"></span>
+                        </div>
+                    </div>
+                    <div class="row">
+                        <div class="col-md-6 mb-3">
+                            <label asp-for="DateOfBirth" class="form-label">Date of Birth</label>
+                            <input asp-for="DateOfBirth" class="form-control" required>
+                            <span asp-validation-for="DateOfBirth" class="field-validation-error"></span>
+                        </div>
+                        <div class="col-md-6 mb-3">
+                            <label asp-for="ContactNumber" class="form-label">Contact Number</label>
+                            <input asp-for="ContactNumber" class="form-control">
+                            <span asp-validation-for="ContactNumber" class="field-validation-error"></span>
+                        </div>
+                    </div>
+                </div>
+
+                <div class="form-section">
+                    <h4><i class="fas fa-utensils me-2"></i>What is your favorite food?</h4>
+                    <p class="text-muted">Select all that apply</p>
+                    <div class="food-preferences">
+                        <div class="food-option" data-food="Pizza">
+                            <i class="fas fa-check-circle checkmark"></i>
+                            <div class="food-icon"><i class="fas fa-pizza-slice"></i></div>
+                            <div>Pizza</div>
+                        </div>
+                        <div class="food-option" data-food="Pasta">
+                            <i class="fas fa-check-circle checkmark"></i>
+                            <div class="food-icon"><i class="fas fa-bacon"></i></div>
+                            <div>Pasta</div>
+                        </div>
+                        <div class="food-option" data-food="Pap and Wors">
+                            <i class="fas fa-check-circle checkmark"></i>
+                            <div class="food-icon"><i class="fas fa-drumstick-bite"></i></div>
+                            <div>Pap and Wors</div>
+                        </div>
+                        <div class="food-option" data-food="Other">
+                            <i class="fas fa-check-circle checkmark"></i>
+                            <div class="food-icon"><i class="fas fa-ellipsis-h"></i></div>
+                            <div>Other</div>
+                        </div>
+                    </div>
+                    <input type="hidden" asp-for="FavoriteFoods" id="favoriteFoods">
+                    <span asp-validation-for="FavoriteFoods" class="field-validation-error"></span>
+                    <div class="text-danger mt-2" id="foodError"></div>
+                </div>
+
+                <div class="form-section">
+                    <h4><i class="fas fa-star me-2"></i>Please rate your level of agreement</h4>
+                    <p class="text-muted">On a scale from 1 (Strongly Agree) to 5 (Strongly Disagree)</p>
+
+                    <div class="table-responsive">
+                        <table class="rating-table">
+                            <thead>
+                                <tr>
+                                    <th></th>
+                                    <th>Strongly Agree (1)</th>
+                                    <th>Agree (2)</th>
+                                    <th>Neutral (3)</th>
+                                    <th>Disagree (4)</th>
+                                    <th>Strongly Disagree (5)</th>
+                                </tr>
+                            </thead>
+                            <tbody>
+                                <tr>
+                                    <td class="text-start">I like to watch movies</td>
+                                    <td><div class="rating-option"><input type="radio" asp-for="MoviesRating" value="1" required></div></td>
+                                    <td><div class="rating-option"><input type="radio" asp-for="MoviesRating" value="2"></div></td>
+                                    <td><div class="rating-option"><input type="radio" asp-for="MoviesRating" value="3"></div></td>
+                                    <td><div class="rating-option"><input type="radio" asp-for="MoviesRating" value="4"></div></td>
+                                    <td><div class="rating-option"><input type="radio" asp-for="MoviesRating" value="5"></div></td>
+                                </tr>
+                                <tr>
+                                    <td class="text-start">I like to listen to radio</td>
+                                    <td><div class="rating-option"><input type="radio" asp-for="RadioRating" value="1" required></div></td>
+                                    <td><div class="rating-option"><input type="radio" asp-for="RadioRating" value="2"></div></td>
+                                    <td><div class="rating-option"><input type="radio" asp-for="RadioRating" value="3"></div></td>
+                                    <td><div class="rating-option"><input type="radio" asp-for="RadioRating" value="4"></div></td>
+                                    <td><div class="rating-option"><input type="radio" asp-for="RadioRating" value="5"></div></td>
+                                </tr>
+                                <tr>
+                                    <td class="text-start">I like to eat out</td>
+                                    <td><div class="rating-option"><input type="radio" asp-for="EatOutRating" value="1" required></div></td>
+                                    <td><div class="rating-option"><input type="radio" asp-for="EatOutRating" value="2"></div></td>
+                                    <td><div class="rating-option"><input type="radio" asp-for="EatOutRating" value="3"></div></td>
+                                    <td><div class="rating-option"><input type="radio" asp-for="EatOutRating" value="4"></div></td>
+                                    <td><div class="rating-option"><input type="radio" asp-for="EatOutRating" value="5"></div></td>
+                                </tr>
+                                <tr>
+                                    <td class="text-start">I like to watch TV</td>
+                                    <td><div class="rating-option"><input type="radio" asp-for="TVRating" value="1" required></div></td>
+                                    <td><div class="rating-option"><input type="radio" asp-for="TVRating" value="2"></div></td>
+                                    <td><div class="rating-option"><input type="radio" asp-for="TVRating" value="3"></div></td>
+                                    <td><div class="rating-option"><input type="radio" asp-for="TVRating" value="4"></div></td>
+                                    <td><div class="rating-option"><input type="radio" asp-for="TVRating" value="5"></div></td>
+                                </tr>
+                            </tbody>
+                        </table>
+                    </div>
+                    <div class="text-danger mt-2" id="ratingError"></div>
+                </div>
+
+                <div class="text-center mt-4">
+                    <button type="submit" class="btn btn-primary btn-lg">
+                        <i class="fas fa-paper-plane me-2"></i>Submit Survey
+                    </button>
+                    <a asp-action="Results" class="btn btn-results btn-lg">
+                        <i class="fas fa-chart-bar me-2"></i>View Results
+                    </a>
+                </div>
+            </form>
+        </div>
+    </div>
+
+    <script>
+        document.addEventListener('DOMContentLoaded', function() {
+            // Food selection logic
+            const foodOptions = document.querySelectorAll('.food-option');
+            const favoriteFoodsInput = document.getElementById('favoriteFoods');
+            let selectedFoods = [];
+
+            // Initialize with any existing values
+            if (favoriteFoodsInput.value) {
+                selectedFoods = favoriteFoodsInput.value.split(',');
+                foodOptions.forEach(option => {
+                    const food = option.getAttribute('data-food');
+                    if (selectedFoods.includes(food)) {
+                        option.classList.add('selected');
+                    }
+                });
+            }
+
+            foodOptions.forEach(option => {
+                option.addEventListener('click', function() {
+                    this.classList.toggle('selected');
+                    const food = this.getAttribute('data-food');
+
+                    if (this.classList.contains('selected')) {
+                        if (!selectedFoods.includes(food)) {
+                            selectedFoods.push(food);
+                        }
+                    } else {
+                        selectedFoods = selectedFoods.filter(f => f !== food);
+                    }
+
+                    favoriteFoodsInput.value = selectedFoods.join(',');
+                });
+            });
+
+            // Form validation
+            const form = document.getElementById('surveyForm');
+            const foodError = document.getElementById('foodError');
+            const ratingError = document.getElementById('ratingError');
+
+            form.addEventListener('submit', function(event) {
+                let isValid = true;
+
+                // Validate food selection
+                if (selectedFoods.length === 0) {
+                    foodError.textContent = 'Please select at least one food preference.';
+                    isValid = false;
+                } else {
+                    foodError.textContent = '';
+                }
+
+                // Validate rating selections
+                const ratingNames = ['MoviesRating', 'RadioRating', 'EatOutRating', 'TVRating'];
+                let ratingValid = true;
+
+                ratingNames.forEach(name => {
+                    const selected = document.querySelector(`input[name="${name}"]:checked`);
+                    if (!selected) {
+                        ratingValid = false;
+                    }
+                });
+
+                if (!ratingValid) {
+                    ratingError.textContent = 'Please provide ratings for all categories.';
+                    isValid = false;
+                } else {
+                    ratingError.textContent = '';
+                }
+
+                if (!isValid) {
+                    event.preventDefault();
+                    event.stopPropagation();
+                }
+
+                form.classList.add('was-validated');
+            });
+        });
+    </script>
+</body>
+</html>
